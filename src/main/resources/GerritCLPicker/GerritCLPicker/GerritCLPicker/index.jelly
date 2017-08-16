@@ -1,0 +1,204 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+  xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form"
+  xmlns:i="jelly:fmt" xmlns:p="/lib/hudson/project">
+
+            <script src="${rootURL}${it.getJsUrl('gerrit-search.js')}" type="text/javascript"></script>
+            <style type="text/css">
+                tr.disablehover:hover {
+                background-color: white;
+                }
+            </style>
+
+                        <h1>${%Select CL Sets}</h1>
+                        <f:section>
+
+                            <f:entry title="Select Gerrit Server">
+                                <j:set var="servers" value="${it.getEnabledServers()}" />
+                                <select name="selectedServer" id= "gerritServer">
+                                    <j:forEach var="serverName" items="${servers}">
+                                        <j:set var="fg_selected" value="false"/>
+                                        <j:if test="${serverName eq it.selectedServer}">
+                                            <j:set var="fg_selected" value="true"/>
+                                        </j:if>
+					<f:option selected="${fg_selected}" value="${serverName}">${serverName}</f:option>
+                                    </j:forEach>
+                                </select>
+                            </f:entry>
+                            <f:entry title="${%Query String}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearch.html">
+                                <f:textbox name="queryString"
+                                           value="${it.queryString}" id="queryString"
+                                           default="status:open"/>
+                            </f:entry>
+
+                            <f:entry title="${%Project}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearchProject.html">
+                                <f:textbox name="project"
+                                           value="${it.project}" id="project"
+                                           default="" onChange="ProjectChange()"/>
+                            </f:entry>
+                            <f:entry title="${%branch}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearchBranch.html">
+                                <f:textbox name="branch"
+                                           value="${it.branch}" id="branch"
+                                           default="" onChange="BranchChange()"/>
+                            </f:entry>
+                            <f:entry title="${%owner}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearchOwner.html">
+                                <f:textbox name="owner"
+                                           value="${it.owner}" id="owner"
+                                           default="" onChange="OwnerChange()"/>
+                            </f:entry>
+                            <f:entry title="${%changeIDs}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearchChangeIDs.html">
+                                <f:textbox name="changeIDs"
+                                           value="${it.changeIDs}" id="changeIDs"
+                                           default="" onChange="changeIDsChange()"/>
+                            </f:entry>
+
+                            <f:entry title="${%Include All Patchsets}"
+                                     help="/plugin/gerrit-trigger/help-GerritSearchAllPatchSets.html">
+                                <f:checkbox name="allPatchSets"
+                                            checked="${it.allPatchSets}" id="allPatchSets"
+                                            default="false"/>
+                            </f:entry>
+                            <f:entry>
+                            <input type="button" value="Update" onClick="GerritSearch()"/>
+                            </f:entry>
+                        </f:section>
+                            
+                        
+                        
+                        
+<f:entry title="${%Select CL Sets}" description="${it.description}" >
+        <div name="parameter" description="${it.description}" >
+
+<input type="hidden" name="name" value="${it.name}"/>
+<st:include page="draw_table.jelly" optional="true"/>
+
+</div>
+
+
+    <st:bind var="a" value="${it}"/>
+
+    <script>
+        function GerritSearch() {
+            var branchEle = document.getElementById("branch");
+            var projectEle = document.getElementById("project");
+            var ownerEle = document.getElementById("owner");
+	    var changeIDsEle = document.getElementById("changeIDs");
+	    var gerritServerEle = document.getElementById("gerritServer");
+            var queryStringEle = document.getElementById("queryString");
+            var allPatchSetsEle = document.getElementById("allPatchSets");
+            a.update(gerritServerEle.value, queryStringEle.value, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
+            window.location.reload();
+        }
+        function BranchChange() {
+            var branchEle = document.getElementById("branch");
+            var projectEle = document.getElementById("project");
+            var ownerEle = document.getElementById("owner");
+	    var changeIDsEle = document.getElementById("changeIDs");
+            var gerritServerEle = document.getElementById("gerritServer");
+            var queryStringEle = document.getElementById("queryString");
+            var allPatchSetsEle = document.getElementById("allPatchSets");
+
+	    var tmp;
+            tmp = branchEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
+            if (tmp.length > 0){
+            tmp = "(branch:" + tmp + ")";
+
+            var queryStringtmp = queryStringEle.value;
+            queryStringtmp = queryStringtmp.replace(/(\(branch:[^)]*\))/g, "");
+            queryStringtmp = queryStringtmp.replace(/(branch:[^ ]*)/g, "");
+            queryStringtmp += " " + tmp;
+            queryStringEle.value = queryStringtmp
+            a.update(gerritServerEle.value, queryStringtmp, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
+            }
+            
+        }
+        function ProjectChange() {
+            var branchEle = document.getElementById("branch");
+            var projectEle = document.getElementById("project");
+            var ownerEle = document.getElementById("owner");
+	    var changeIDsEle = document.getElementById("changeIDs");
+            var gerritServerEle = document.getElementById("gerritServer");
+            var queryStringEle = document.getElementById("queryString");
+            var allPatchSetsEle = document.getElementById("allPatchSets");
+
+            var tmp;
+            tmp = projectEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
+            if (tmp.length > 0){
+            tmp = "(project:" + tmp + ")";
+
+
+            var queryStringtmp = queryStringEle.value;
+            queryStringtmp = queryStringtmp.replace(/(\(project:[^)]*\))/g, "");
+            queryStringtmp = queryStringtmp.replace(/(project:[^ ]*)/g, "");
+            queryStringtmp += " " + tmp;
+            queryStringEle.value = queryStringtmp
+            a.update(gerritServerEle.value, queryStringtmp, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
+            }
+        }
+        function OwnerChange() {
+            var branchEle = document.getElementById("branch");
+            var projectEle = document.getElementById("project");
+            var ownerEle = document.getElementById("owner");
+	    var changeIDsEle = document.getElementById("changeIDs");
+            var gerritServerEle = document.getElementById("gerritServer");
+            var queryStringEle = document.getElementById("queryString");
+            var allPatchSetsEle = document.getElementById("allPatchSets");
+
+            var tmp;
+            tmp = ownerEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
+            if (tmp.length > 0){
+            tmp = "(owner:" + tmp + ")";
+
+            var queryStringtmp = queryStringEle.value;
+            queryStringtmp = queryStringtmp.replace(/(\(owner:[^)]*\))/g, "");
+            queryStringtmp = queryStringtmp.replace(/(owner:[^ ]*)/g, "");
+            
+            queryStringtmp += " " + tmp;
+            queryStringEle.value = queryStringtmp
+            a.update(gerritServerEle.value, queryStringtmp, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
+            }
+
+        }
+
+	function changeIDsChange() {
+            var branchEle = document.getElementById("branch");
+            var projectEle = document.getElementById("project");
+            var ownerEle = document.getElementById("owner");
+	    var changeIDsEle = document.getElementById("changeIDs");
+            var gerritServerEle = document.getElementById("gerritServer");
+            var queryStringEle = document.getElementById("queryString");
+            var allPatchSetsEle = document.getElementById("allPatchSets");
+
+            var tmp;
+            tmp = changeIDsEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
+            if (tmp.length > 0){
+            tmp = "(change:" + tmp + ")";
+
+            var queryStringtmp = queryStringEle.value;
+            queryStringtmp = queryStringtmp.replace(/(\(change:[^)]*\))/g, "");
+            queryStringtmp = queryStringtmp.replace(/(change:[^ ]*)/g, "");
+
+            queryStringtmp += " " + tmp;
+            queryStringEle.value = queryStringtmp
+            a.update(gerritServerEle.value, queryStringtmp, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
+            }
+
+        }
+
+
+    </script>
+
+
+
+
+
+</f:entry>
+
+
+
+</j:jelly>
