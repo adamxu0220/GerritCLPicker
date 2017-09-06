@@ -57,7 +57,8 @@
 
 
     <script>
-        function BranchChange() {
+
+        function PropertyChange(Property) {
             var branchEle = document.getElementById("branch");
             var projectEle = document.getElementById("project");
             var ownerEle = document.getElementById("owner");
@@ -65,90 +66,37 @@
             var gerritServerEle = document.getElementById("gerritServer");
             var queryStringEle = document.getElementById("queryString");
             var allPatchSetsEle = document.getElementById("allPatchSets");
+            var PropertyEle = document.getElementById(Property);
 
             var tmp;
-            tmp = branchEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
+            tmp = PropertyEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
             if (tmp.length > 0){
-            tmp = "(branch:" + tmp + ")";
-
+                tmp="("+Property+":" + tmp + ")";
+            }
+            else {
+                tmp="";
+            }
             var queryStringtmp = queryStringEle.value;
-            queryStringtmp = queryStringtmp.replace(/(\(branch:[^)]*\))/g, "");
-            queryStringtmp = queryStringtmp.replace(/(branch:[^ ]*)/g, "");
+            var RegEx=new RegExp(Property+':[^)]*', 'g')
+            queryStringtmp = queryStringtmp.replace(RegEx, "").replace(/\(\)/g, "");
             queryStringtmp += " " + tmp;
             queryStringEle.value = queryStringtmp
-            }
-
+            a.update(gerritServerEle.value, queryStringtmp, allPatchSetsEle.checked, branchEle.value, projectEle.value, ownerEle.value, changeIDsEle.value);
         }
-        
-	function ProjectChange() {
-            var branchEle = document.getElementById("branch");
-            var projectEle = document.getElementById("project");
-            var ownerEle = document.getElementById("owner");
-            var changeIDsEle = document.getElementById("changeIDs");
-            var gerritServerEle = document.getElementById("gerritServer");
-            var queryStringEle = document.getElementById("queryString");
-            var allPatchSetsEle = document.getElementById("allPatchSets");
 
-            var tmp;
-            tmp = projectEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
-            if (tmp.length > 0){
-            tmp = "(project:" + tmp + ")";
-
-
-            var queryStringtmp = queryStringEle.value;
-            queryStringtmp = queryStringtmp.replace(/(\(project:[^)]*\))/g, "");
-            queryStringtmp = queryStringtmp.replace(/(project:[^ ]*)/g, "");
-            queryStringtmp += " " + tmp;
-            queryStringEle.value = queryStringtmp
-            }
+        function BranchChange() {
+            PropertyChange('branch');
+        }
+        function ProjectChange() {
+            PropertyChange('project');
         }
         function OwnerChange() {
-            var branchEle = document.getElementById("branch");
-            var projectEle = document.getElementById("project");
-            var ownerEle = document.getElementById("owner");
-            var changeIDsEle = document.getElementById("changeIDs");
-            var gerritServerEle = document.getElementById("gerritServer");
-            var queryStringEle = document.getElementById("queryString");
-            var allPatchSetsEle = document.getElementById("allPatchSets");
-
-            var tmp;
-            tmp = ownerEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
-            if (tmp.length > 0){
-            tmp = "(owner:" + tmp + ")";
-
-            var queryStringtmp = queryStringEle.value;
-            queryStringtmp = queryStringtmp.replace(/(\(owner:[^)]*\))/g, "");
-            queryStringtmp = queryStringtmp.replace(/(owner:[^ ]*)/g, "");
-
-            queryStringtmp += " " + tmp;
-            queryStringEle.value = queryStringtmp
-            }
-
+            PropertyChange('owner');
         }
-
         function changeIDsChange() {
-            var branchEle = document.getElementById("branch");
-            var projectEle = document.getElementById("project");
-            var ownerEle = document.getElementById("owner");
-            var changeIDsEle = document.getElementById("changeIDs");
-            var gerritServerEle = document.getElementById("gerritServer");
-            var queryStringEle = document.getElementById("queryString");
-            var allPatchSetsEle = document.getElementById("allPatchSets");
-
-            var tmp;
-            tmp = changeIDsEle.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '').replace(/;/g, " OR ");
-            if (tmp.length > 0){
-            tmp = "(change:" + tmp + ")";
-
-            var queryStringtmp = queryStringEle.value;
-            queryStringtmp = queryStringtmp.replace(/(\(change:[^)]*\))/g, "");
-            queryStringtmp = queryStringtmp.replace(/(change:[^ ]*)/g, "");
-
-            queryStringtmp += " " + tmp;
-            queryStringEle.value = queryStringtmp
-            }
-
+            PropertyChange('changeIDs');
         }
+
 
 
     </script>
